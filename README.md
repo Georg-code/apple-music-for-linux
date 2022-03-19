@@ -1,3 +1,3 @@
-[![Snap](https://bit.ly/2ZWfetD)](https://snapcraft.io/apple-music-for-linux)
+**Forked from https://github.com/mgechev/electron-typescript-boilerplate**
 
-![Screenshot](https://bit.ly/2S7BOh8)
+Apple music client for Linux based on electron.

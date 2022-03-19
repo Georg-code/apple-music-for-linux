@@ -1,6 +1,9 @@
 import { app, BrowserWindow, Menu, shell, nativeTheme } from "electron";
 import * as fs from "fs";
+import { DiscordPresence } from "./src/discord";
 
+const discord = new DiscordPresence();
+discord.update();
 const appName = "Apple Music";
 
 enum theme {

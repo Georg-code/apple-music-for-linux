@@ -2,6 +2,9 @@
 exports.__esModule = true;
 var electron_1 = require("electron");
 var fs = require("fs");
+var discord_1 = require("./src/discord");
+var discord = new discord_1.DiscordPresence();
+discord.update();
 var appName = "Apple Music";
 var theme;
 (function (theme) {

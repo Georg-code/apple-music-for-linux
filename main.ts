@@ -8,12 +8,8 @@ import {
 } from "electron";
 import * as fs from "fs";
 import { DiscordPresence } from "./src/Discord";
-
 import * as path from "path";
-
 const discord = new DiscordPresence();
-
-const appName = "Apple Music";
 
 enum theme {
   light,
@@ -56,11 +52,10 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
-    title: appName,
+    title: "Apple Music",
+
     webPreferences: {
-      preload: path.join(__dirname, "src/preload.js"), //You need to create a file named preload.js (or any name) in your code
-      contextIsolation: false,
-      webviewTag: true,
+      preload: path.join(__dirname, "src/preloadScript.js"),
       nodeIntegration: true,
     },
   });
@@ -96,30 +91,20 @@ function createWindow() {
     }
   });
 
-  mainWindow.webContents.on(
-    "new-window",
-    (event, url, frameName, disposition, options) => {
-      event.preventDefault();
-      shell.openExternal(url);
-    }
-  );
-
   mainWindow.webContents.on("did-navigate", () => {
     mainWindow.webContents.insertCSS(customCss);
   });
 
   mainWindow.webContents.on("page-title-updated", () => {
     mainWindow.webContents.insertCSS(customCss);
-    mainWindow.setTitle(appName);
+    mainWindow.setTitle("Apple Music");
   });
 
   mainWindow.webContents.on("did-frame-finish-load", () => {
-    console.info("ready-to-show");
-    mainWindow.webContents
-      .executeJavaScript("window.audioPlayer", false)
-      .then((result) => {
-        console.log(result);
-      });
+    mainWindow.webContents.openDevTools();
+    mainWindow.webContents.executeJavaScript(
+      'Object.defineProperty(window,"a",{configurable:!0,set(e){window.postMessage({myTypeField:"my-custom-message",someData:window["audioPlayer"]}),Object.defineProperty(window,"a",{value:e})}});' // Insert here a observer if the field audioPlayer changes. Then send it to preload
+    );
   });
 
   mainWindow.on("close", () => {
@@ -131,11 +116,12 @@ app.on("ready", () => {
   createWindow();
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    ipcMain.on("custom-message", (event, message) => {
+      console.log("got an IPC message", message);
+    });
   });
 });
 
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
-
-ipcMain.on("musicplayer-data", () => {});

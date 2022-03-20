@@ -1,11 +1,10 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var fs = require("fs");
 var Discord_1 = require("./src/Discord");
 var path = require("path");
 var discord = new Discord_1.DiscordPresence();
-var appName = "Apple Music";
 var theme;
 (function (theme) {
     theme[theme["light"] = 0] = "light";
@@ -41,13 +40,11 @@ function createWindow() {
     var mainWindow = new electron_1.BrowserWindow({
         width: 1000,
         height: 600,
-        title: appName,
+        title: "Apple Music",
         webPreferences: {
-            preload: path.join(__dirname, "src/preload.js"),
-            contextIsolation: false,
-            webviewTag: true,
-            nodeIntegration: true
-        }
+            preload: path.join(__dirname, "src/preloadScript.js"),
+            nodeIntegration: true,
+        },
     });
     mainWindow.loadURL(appUrl + locale.toLowerCase() + "/browse");
     mainWindow.webContents.on("before-input-event", function (event, input) {
@@ -76,24 +73,17 @@ function createWindow() {
             electron_1.shell.openExternal(url);
         }
     });
-    mainWindow.webContents.on("new-window", function (event, url, frameName, disposition, options) {
-        event.preventDefault();
-        electron_1.shell.openExternal(url);
-    });
     mainWindow.webContents.on("did-navigate", function () {
         mainWindow.webContents.insertCSS(customCss);
     });
     mainWindow.webContents.on("page-title-updated", function () {
         mainWindow.webContents.insertCSS(customCss);
-        mainWindow.setTitle(appName);
+        mainWindow.setTitle("Apple Music");
     });
     mainWindow.webContents.on("did-frame-finish-load", function () {
-        console.info("ready-to-show");
-        mainWindow.webContents
-            .executeJavaScript("window.audioPlayer", false)
-            .then(function (result) {
-            console.log(result);
-        });
+        mainWindow.webContents.openDevTools();
+        mainWindow.webContents.executeJavaScript('Object.defineProperty(window,"a",{configurable:!0,set(e){window.postMessage({myTypeField:"my-custom-message",someData:window["audioPlayer"]}),Object.defineProperty(window,"a",{value:e})}});' // Insert here a observer if the field audioPlayer changes. Then send it to preload
+        );
     });
     mainWindow.on("close", function () {
         electron_1.app.exit(0);
@@ -104,10 +94,12 @@ electron_1.app.on("ready", function () {
     electron_1.app.on("activate", function () {
         if (electron_1.BrowserWindow.getAllWindows().length === 0)
             createWindow();
+        electron_1.ipcMain.on("custom-message", function (event, message) {
+            console.log("got an IPC message", message);
+        });
     });
 });
 electron_1.app.on("window-all-closed", function () {
     if (process.platform !== "darwin")
         electron_1.app.quit();
 });
-electron_1.ipcMain.on("musicplayer-data", function () { });

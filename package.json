@@ -46,6 +46,7 @@
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "discord-rich-presence": "^0.0.8"
+    "discord-rich-presence": "^0.0.8",
+    "on-change": "^3.0.2"
   }
 }

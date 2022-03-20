@@ -2,7 +2,12 @@ const client = require("discord-rich-presence")("954731904773537822");
 
 export class DiscordPresence {
   constructor() {
-    this.update("playing", "Apple Music", "Apple Music", 1337);
+    this.update(
+      "playing",
+      "Ich schreib grad nen",
+      "Client dazu, daher noch nichts da",
+      1337
+    );
   }
   public update(
     status: "paused" | "playing",

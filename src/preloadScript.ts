@@ -1,9 +1,11 @@
-alert("loaded");
+const { ipcRenderer } = require("electron");
 
-import { webContents } from "electron";
+process.once("loaded", () => {
+  window.addEventListener("message", (event) => {
+    const message = event.data;
 
-webContents.getAllWebContents().forEach((webContents) => {
-  webContents.executeJavaScript("window.audioPlayer", false).then((result) => {
-    alert(result);
+    if (message.myTypeField === "my-custom-message") {
+      ipcRenderer.send("custom-message", message);
+    }
   });
 });

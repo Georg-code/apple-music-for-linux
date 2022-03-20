@@ -2,9 +2,9 @@
 exports.__esModule = true;
 var electron_1 = require("electron");
 var fs = require("fs");
-var discord_1 = require("./src/discord");
-var discord = new discord_1.DiscordPresence();
-discord.update();
+var Discord_1 = require("./src/Discord");
+var path = require("path");
+var discord = new Discord_1.DiscordPresence();
 var appName = "Apple Music";
 var theme;
 (function (theme) {
@@ -41,7 +41,13 @@ function createWindow() {
     var mainWindow = new electron_1.BrowserWindow({
         width: 1000,
         height: 600,
-        title: appName
+        title: appName,
+        webPreferences: {
+            preload: path.join(__dirname, "src/preload.js"),
+            nodeIntegration: true,
+            contextIsolation: false,
+            webviewTag: true
+        }
     });
     mainWindow.loadURL(appUrl + locale.toLowerCase() + "/browse");
     mainWindow.webContents.on("before-input-event", function (event, input) {
@@ -81,6 +87,11 @@ function createWindow() {
         mainWindow.webContents.insertCSS(customCss);
         mainWindow.setTitle(appName);
     });
+    mainWindow.webContents
+        .executeJavaScript("console.log(audioplayer);", true)
+        .then(function (result) {
+        console.log(result);
+    });
     mainWindow.on("close", function () {
         electron_1.app.exit(0);
     });
@@ -96,3 +107,4 @@ electron_1.app.on("window-all-closed", function () {
     if (process.platform !== "darwin")
         electron_1.app.quit();
 });
+electron_1.ipcMain.on("musicplayer-data", function () { });

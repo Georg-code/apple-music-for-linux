@@ -1,9 +1,18 @@
-import { app, BrowserWindow, Menu, shell, nativeTheme } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  shell,
+  nativeTheme,
+  ipcMain,
+} from "electron";
 import * as fs from "fs";
-import { DiscordPresence } from "./src/discord";
+import { DiscordPresence } from "./src/Discord";
+
+import * as path from "path";
 
 const discord = new DiscordPresence();
-discord.update();
+
 const appName = "Apple Music";
 
 enum theme {
@@ -48,6 +57,12 @@ function createWindow() {
     width: 1000,
     height: 600,
     title: appName,
+    webPreferences: {
+      preload: path.join(__dirname, "src/preload.js"), //You need to create a file named preload.js (or any name) in your code
+      nodeIntegration: true,
+      contextIsolation: false,
+      webviewTag: true,
+    },
   });
   mainWindow.loadURL(appUrl + locale.toLowerCase() + "/browse");
 
@@ -98,6 +113,12 @@ function createWindow() {
     mainWindow.setTitle(appName);
   });
 
+  mainWindow.webContents
+    .executeJavaScript("console.log(audioplayer);", true)
+    .then((result) => {
+      console.log(result);
+    });
+
   mainWindow.on("close", () => {
     app.exit(0);
   });
@@ -113,3 +134,5 @@ app.on("ready", () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
+
+ipcMain.on("musicplayer-data", () => {});

@@ -59,9 +59,9 @@ function createWindow() {
     title: appName,
     webPreferences: {
       preload: path.join(__dirname, "src/preload.js"), //You need to create a file named preload.js (or any name) in your code
-      nodeIntegration: true,
       contextIsolation: false,
       webviewTag: true,
+      nodeIntegration: true,
     },
   });
   mainWindow.loadURL(appUrl + locale.toLowerCase() + "/browse");
@@ -113,11 +113,14 @@ function createWindow() {
     mainWindow.setTitle(appName);
   });
 
-  mainWindow.webContents
-    .executeJavaScript("console.log(audioplayer);", true)
-    .then((result) => {
-      console.log(result);
-    });
+  mainWindow.webContents.on("did-frame-finish-load", () => {
+    console.info("ready-to-show");
+    mainWindow.webContents
+      .executeJavaScript("window.audioPlayer", false)
+      .then((result) => {
+        console.log(result);
+      });
+  });
 
   mainWindow.on("close", () => {
     app.exit(0);

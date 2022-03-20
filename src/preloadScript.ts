@@ -1,3 +1,9 @@
-import { ipcRenderer } from "electron";
+alert("loaded");
 
-ipcRenderer.send("preload-ready", );
+import { webContents } from "electron";
+
+webContents.getAllWebContents().forEach((webContents) => {
+  webContents.executeJavaScript("window.audioPlayer", false).then((result) => {
+    alert(result);
+  });
+});

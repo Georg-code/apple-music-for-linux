@@ -44,9 +44,9 @@ function createWindow() {
         title: appName,
         webPreferences: {
             preload: path.join(__dirname, "src/preload.js"),
-            nodeIntegration: true,
             contextIsolation: false,
-            webviewTag: true
+            webviewTag: true,
+            nodeIntegration: true
         }
     });
     mainWindow.loadURL(appUrl + locale.toLowerCase() + "/browse");
@@ -87,10 +87,13 @@ function createWindow() {
         mainWindow.webContents.insertCSS(customCss);
         mainWindow.setTitle(appName);
     });
-    mainWindow.webContents
-        .executeJavaScript("console.log(audioplayer);", true)
-        .then(function (result) {
-        console.log(result);
+    mainWindow.webContents.on("did-frame-finish-load", function () {
+        console.info("ready-to-show");
+        mainWindow.webContents
+            .executeJavaScript("window.audioPlayer", false)
+            .then(function (result) {
+            console.log(result);
+        });
     });
     mainWindow.on("close", function () {
         electron_1.app.exit(0);
